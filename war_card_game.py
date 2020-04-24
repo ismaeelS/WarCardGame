@@ -1,7 +1,5 @@
 import random
 
-deck_states = []
-
 def compare_cards(p1_name, p2_name, card1, card2, ranks=['2','3','4','5','6','7','8','9','10','J','Q','K','A']):
   """Compares two cards by card rank
 
@@ -239,15 +237,7 @@ class Player():
     self.deck = Deck(cards)
 
   def battle(self, opponent):
-    print()
-    global deck_states
-
-    #check if stuck in a game loop
-    current_deck_state = ("".join(self.deck.cards))[::2]+" "+("".join(opponent.deck.cards))[::2]
-    
-    if (current_deck_state in deck_states):
-      return exitStatement("Game Loop")
-    else: deck_states.append(current_deck_state)
+    print() #CHECK IF NEEDED
 
     own_cards = []
     opp_cards = []
@@ -294,6 +284,7 @@ class GameOfWar():
     self.game_over = False
     self.turns = 0
     self.turn_limit = 1000
+    self.game_states = []
 
     self.playing_cards = PlayingCards()
     self.playing_cards.shuffle()
@@ -324,7 +315,9 @@ class GameOfWar():
 
   #allow printing of deck length while playing
   def play(self):
+
     requested_turns_played = 0
+    reason_for_game_over = ""
 
     while (self.turns < self.turn_limit):
       if (self.game_over): break
@@ -334,6 +327,16 @@ class GameOfWar():
       requested_turns_played = 0
       while (requested_turns_played < turns_to_play):
         if (self.turns >= self.turn_limit): break
+
+        # check if stuck in a game loop
+        current_game_state = ("".join(self.player1.deck.cards))[::2]+" "+("".join(self.player2.deck.cards))[::2]
+        
+        if (current_game_state in self.game_states):
+          reason_for_game_over = exitStatement("Game Loop")
+          self.game_over = True
+          break
+        else:
+          self.game_states.append(current_game_state)
 
         reason_for_game_over = self.player1.battle(self.player2)
 
@@ -348,7 +351,7 @@ class GameOfWar():
           print("\nAble to play", turns_to_play, "rounds.")
 
     if (requested_turns_played < turns_to_play):
-      print("Only able to play", requested_turns_played, "of the", turns_to_play, "requested rounds due to the game ending.")
+      print("Able to play", requested_turns_played, "of the", turns_to_play, "requested rounds due to the game ending.")
 
     if (not self.game_over and self.turns >= self.turn_limit):
       reason_for_game_over = exitStatement("Turn Limit")+str(self.turn_limit)
@@ -363,7 +366,6 @@ class GameOfWar():
 game = GameOfWar()
 game.print_game_info()
 game.play()
-
 
 #To-Do: need a discard for each player
 #To-Do: Add rest of the docstrings
